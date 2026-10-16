@@ -1,53 +1,44 @@
 # QuotaGuard Skill
 
-**Give your Plus agent a sense of time.**
+**Help your agent make better use of each five-hour quota window.**
 
-A local, open-source skill for ChatGPT Plus users working with Work or Codex.
-It reads remaining quota and reset times, then helps the agent choose a sensible
-pace for research, documents, and coding tasks.
+A lightweight skill for ChatGPT Plus users working with Codex. It gives the agent two pieces of context: **how much quota is left, and how long until it resets**.
 
-![QuotaGuard overview](media/poster.png)
+The goal is simple: make useful progress on the task you have already given the agent while quota is available. Do not leave worthwhile work undone just because the agent cannot see its allowance. Do not create unnecessary work just to empty the meter.
 
-[Watch the narrated demo](https://github.com/liuguangyu272/quotaguard-skill/releases/latest)
+## Why this exists
 
-## Why time matters
+I built this because I wanted to make better use of my Plus quota between resets, including when my account offered additional reset opportunities. Seeing only a remaining percentage was not enough: the time until the next reset changes how that allowance can be used.
 
-Both examples have **10% left**. They should not lead to the same plan.
+QuotaGuard supplies that missing context. It does not manage or redeem reset offers.
 
-| Quota left | Reset in | Budget | Suggested pace |
-|---|---|---|---|
-| 10% | 2 hours | 5 percentage points/hour | Tight: smaller stages, core work first |
-| 10% | 15 minutes | 40 percentage points/hour | Abundant: useful work that still fits the remaining 10% |
+## One calculation
 
-```
+```text
 hourly budget = remaining quota percentage / hours until reset
 ```
 
-The default personal reference is **12 percentage points/hour**:
+| Quota left | Reset in | Hourly budget |
+|---|---|---|
+| 10% | 2 hours | 5 percentage points/hour |
+| 10% | 15 minutes | 40 percentage points/hour |
 
-| Budget | Level |
-|---|---|
-| < 6 | TIGHT |
-| 6 to < 12 | CONSERVATIVE |
-| 12 to < 18 | COMFORTABLE |
-| >= 18 | ABUNDANT |
+Both cases still have only **10% available**. The second has more quota available per remaining hour, not more quota overall.
 
-This is a planning heuristic, not an OpenAI rate limit or measured burn rate.
-Absolute remaining quota and weekly limits still matter. A near-zero reset
-countdown can produce a large ratio without creating any additional quota.
+The personal reference is **12 percentage points per hour**, with four guidance levels:
 
-## What it does
+| Hourly budget | Level | Guidance |
+|---|---|---|
+| Below 6 | TIGHT | Focus on core work; reduce optional exploration. |
+| 6 to below 12 | CONSERVATIVE | Continue the task with restrained extra investigation. |
+| 12 to below 18 | COMFORTABLE | Proceed at normal, useful depth. |
+| 18 or more | ABUNDANT | Make room for worthwhile depth within the requested task. |
 
-- **Makes quota actionable:** reports both allowance and reset time before substantial work.
-- **Paces long tasks:** guides stage size and optional exploration using time-aware budgets.
-- **Keeps weekly constraints visible:** a healthy short window does not erase a low weekly allowance.
-- **Supports continuity:** asks the agent to write a concrete resume note at useful milestones.
-- **Fails honestly:** unavailable data stays unknown; old log snapshots are clearly marked.
-- **Stays lightweight:** Python standard library only; no API key or separate paid API usage is required by this helper.
+These are preferences, not official limits or predictions of task cost. Necessary verification stays in every level. Absolute remaining quota and weekly limits still apply. A large hourly budget near reset does not make a large task affordable or guarantee it will finish before a limit is reached.
 
-## Install
+## Install and use
 
-Requirements: **Python 3.11+**, a local **Codex installation signed in with your ChatGPT account**, and a skill-capable desktop/CLI environment that can execute local commands. Windows is live-tested; macOS/Linux portability is intended but has not been live-tested for this release.
+Requirements: **Python 3.11+**, local **Codex signed in with your ChatGPT account**, and an environment that supports skills and local command execution. Windows has been live-tested; macOS and Linux have not.
 
 ```sh
 git clone https://github.com/liuguangyu272/quotaguard-skill.git
@@ -55,68 +46,38 @@ cd quotaguard-skill
 python install.py
 ```
 
-Use `python3` on systems where that is the Python 3 command. The installer copies
-the self-contained skill into `$CODEX_HOME/skills/quotaguard`, or
-`~/.codex/skills/quotaguard`. It refuses to overwrite an existing installation.
-For an existing QuotaGuard skill, back it up or rename it first.
+Use `python3` if needed. The installer copies the skill to `$CODEX_HOME/skills/quotaguard`, or `~/.codex/skills/quotaguard`, and refuses to overwrite an existing installation.
 
-On your next turn, try:
+Refresh the skill list or start a new session, then ask:
 
 ```text
-$quotaguard Check my remaining quota and reset time, then help me plan this task.
+$quotaguard Check my remaining quota and reset time, then use that context to make useful progress on this task.
 ```
 
-Automatic selection is enabled for substantial tasks, but is not guaranteed on
-every message. Explicit invocation is the easiest first test. If the skill is
-not listed yet, refresh the skill list or start a new session.
+Automatic skill selection is enabled, but invocation on every message is not guaranteed. This is an on-demand check, not continuous monitoring.
 
-To try the reader before installing:
+To try the reader without installing the skill:
 
 ```sh
 python skill/quotaguard/scripts/query.py
 ```
 
-If Codex cannot be found, set `QUOTAGUARD_CODEX_COMMAND` to the actual executable
-path (a path, not a shell command with arguments). Windows npm installations
-under the standard AppData directory are detected automatically.
+If Codex is not detected, set `QUOTAGUARD_CODEX_COMMAND` to its executable path.
 
-## Data and boundaries
+## Keep it simple
 
-The helper starts a short-lived local `codex app-server`, initializes the
-protocol, and calls `account/rateLimits/read`. Codex owns authentication;
-QuotaGuard does not open `auth.json`. The query helper prints JSON and does not
-write project files. Resume notes are written separately by the agent.
+This project reads quota, calculates a time-aware budget, and gives the agent pacing guidance. It is not a task scheduler, a task-cost predictor, or an automatic reset-credit tool. It does not change the model or grant extra quota.
 
-The reading belongs to the account/workspace used by local Codex. Check that it
-matches the one you use in the App. The default is live-only. An optional
-`--source session` reads local log snapshots and labels pacing UNKNOWN.
+Readings belong to the account used by local Codex; make sure it matches your current task. Unavailable or stale data must not be treated as a live allowance. The helper uses Codex's local app-server interface without opening credential files. It does not cover every ordinary ChatGPT feature's limit.
 
-OpenAI currently documents shared Work/Codex usage and five-hour windows for
-Plus. See [official pricing](https://learn.chatgpt.com/docs/pricing) and the
-[App Server protocol](https://learn.chatgpt.com/docs/app-server). Availability and
-quota structures can change. This does not read every ordinary ChatGPT feature's limit.
+The purpose is **useful work within the current window**, not maximum consumption, guaranteed savings, or a promise that tasks will never be interrupted.
 
-**No extra quota, no limit bypass, no automatic model switching, and no
-guaranteed savings.** This skill guides an agent; it is not a hard enforcement
-proxy or a background scheduler. Necessary verification remains part of the task.
-
-## Evidence
-
-Run the deterministic checks:
+## Validation and credits
 
 ```sh
 python -m unittest discover -s tests -v
 ```
 
-The tests cover time-sensitive decisions, all four boundaries, low weekly quota,
-unknown and expired resets, stale fallback, zero quota, and installation into an
-unrelated directory. See [validation notes](docs/validation.md) for the scope of
-the evidence. Promo examples use **simulated values**, not a recording of a
-customer account. No productivity or cost-saving benchmark is claimed.
+See [validation notes](docs/validation.md) for tested behavior and limitations, and [OpenAI's app-server documentation](https://learn.chatgpt.com/docs/app-server) for the underlying account interface.
 
-## Credits
-
-Built on the MIT-licensed quota readers from
-[LUMOSSES/QuotaGuard](https://github.com/LUMOSSES/QuotaGuard), with a portable
-English skill and the 12-point hourly pacing policy. See [NOTICE](NOTICE.md).
-Independent community project; not affiliated with OpenAI.
+Built on the MIT-licensed readers from [LUMOSSES/QuotaGuard](https://github.com/LUMOSSES/QuotaGuard). See [NOTICE](NOTICE.md). Independent community project; not affiliated with OpenAI.
