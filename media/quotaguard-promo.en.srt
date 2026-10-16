@@ -1,0 +1,47 @@
+1
+00:00:00,000 --> 00:00:06,600
+Using ChatGPT Plus for long tasks? Give your agent a sense of time with QuotaGuard.
+
+2
+00:00:07,250 --> 00:00:13,322
+Ten percent left means something different when reset is two hours away, or just fifteen minutes away.
+
+3
+00:00:14,000 --> 00:00:17,784
+QuotaGuard divides remaining quota by hours until reset.
+
+4
+00:00:17,784 --> 00:00:22,040
+That gives five, or forty, percentage points per hour.
+
+5
+00:00:22,708 --> 00:00:28,876
+A twelve point reference guides four pacing levels: tight, conservative, comfortable, and abundant.
+
+6
+00:00:29,542 --> 00:00:32,302
+Keep weekly limits in view.
+
+7
+00:00:32,302 --> 00:00:33,958
+Preserve essential checks.
+
+8
+00:00:33,958 --> 00:00:36,718
+Save a concrete next step.
+
+9
+00:00:36,718 --> 00:00:39,478
+No extra quota is promised.
+
+10
+00:00:40,167 --> 00:00:46,303
+Install the skill, then ask QuotaGuard to check your budget and plan the work.
+
+11
+00:00:46,303 --> 00:00:47,180
+Open source.
+
+12
+00:00:47,180 --> 00:00:48,495
+Built for Plus.

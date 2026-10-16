@@ -1,0 +1,6 @@
+interface:
+  display_name: "QuotaGuard"
+  short_description: "Pace Plus tasks with remaining quota and reset time"
+  default_prompt: "Use $quotaguard to check my remaining quota and reset time, then pace this task."
+policy:
+  allow_implicit_invocation: true
